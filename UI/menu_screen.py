@@ -12,8 +12,8 @@ class MenuScreen(Screen):
     BUTTON_HEIGHT = 50
     BUTTON_SPACING = 80
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, game):
+        self.game = game
 
         # Load and scale background image
         try:
@@ -32,13 +32,13 @@ class MenuScreen(Screen):
                    "Exit")
         ]
 
-    def handle_events(self, event):
+    def handle_event(self, event):
         for i, button in enumerate(self.menu_buttons):
             if button.handle_event(event):
                 if i == 0:
-                    self.app.set_screen("game")
+                    self.game.set_screen("game")
                 elif i == 1:
-                    self.app.set_screen("options")
+                    self.game.set_screen("options")
                 elif i == 2:
                     pygame.quit()
                     sys.exit()
@@ -46,7 +46,7 @@ class MenuScreen(Screen):
     def draw(self):
         """Draw menu screen."""
         # Draw background first
-        self.app.screen.blit(self.background, (0, 0))
+        self.game.screen.blit(self.background, (0, 0))
         # Then draw buttons on top
         for button in self.menu_buttons:
-            button.draw(self.app.screen)
+            button.draw(self.game.screen)

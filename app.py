@@ -54,7 +54,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
 
-                self.current_screen.handle_events(event)
+                self.current_screen.handle_event(event)
 
             self.screen.fill((0, 0, 0))
 

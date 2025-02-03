@@ -9,7 +9,7 @@ class Screen(ABC):
     CENTER_Y = HEIGHT // 2
 
     @abstractmethod
-    def handle_events(self, event):
+    def handle_event(self, event):
         pass
 
     @abstractmethod

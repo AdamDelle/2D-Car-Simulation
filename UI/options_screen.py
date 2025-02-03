@@ -6,8 +6,8 @@ from button import Button
 
 class OptionsScreen(Screen):
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, game):
+        self.game = game
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
 
         # Options screen elements
@@ -27,13 +27,13 @@ class OptionsScreen(Screen):
         self.active_option = None
         self.font = pygame.font.Font(None, 36)
 
-    def handle_events(self, event):
+    def handle_event(self, event):
         """Handle events for options screen."""
         if self.back_button.handle_event(event):
             if self.active_option:
                 # Validate current input before going back to menu
                 self._validate_input(self.active_option)
-            self.app.set_screen("menu")
+            self.game.set_screen("menu")
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If there's an active option and we click somewhere else, validate the input
@@ -79,29 +79,29 @@ class OptionsScreen(Screen):
 
     def draw(self):
         """Draw options screen."""
-        self.app.screen.blit(self.app.background, (0, 0))
-        self.back_button.draw(self.app.screen)
+        self.game.screen.blit(self.game.background, (0, 0))
+        self.back_button.draw(self.game.screen)
 
         # Draw title
         title = self.font.render("Game Options", True, (255, 255, 255))
         title_rect = title.get_rect(center=(Screen.CENTER_X, 150))
-        self.app.screen.blit(title, title_rect)
+        self.game.screen.blit(title, title_rect)
 
         for option, box in self.input_boxes.items():
             # Draw option label
             label = self.font.render(f"{option} ({self.options[option]['min']}-{self.options[option]['max']} {self.options[option]['unit']})",
                                      True, (255, 255, 255))
             label_rect = label.get_rect(center=(box.centerx, box.y - 25))
-            self.app.screen.blit(label, label_rect)
+            self.game.screen.blit(label, label_rect)
 
             # Draw input box
             color = (100, 100, 100) if self.active_option == option else (50, 50, 50)
-            pygame.draw.rect(self.app.screen, color, box, border_radius=5)
+            pygame.draw.rect(self.game.screen, color, box, border_radius=5)
 
             # Draw input value
             value_text = self.font.render(self.options[option]["value"], True, (255, 255, 255))
             value_rect = value_text.get_rect(center=box.center)
-            self.app.screen.blit(value_text, value_rect)
+            self.game.screen.blit(value_text, value_rect)
 
     def _validate_input(self, option):
         """Validate and correct the input value for an option."""
