@@ -66,6 +66,8 @@ class InputHandler:
         elif self._d_down:
             time_diff = pygame.time.get_ticks() - self._start_time_x
             self._input.x = min(time_diff / self.TIME_UNTIL_MAX_INPUT, 1)
+        else:
+            self._input.x = 0
 
     def _handle_w_pressed(self):
         self._w_down = True
