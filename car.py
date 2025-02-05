@@ -59,7 +59,7 @@ class Car:
         self.lateral_force_rear = np.array([0.0, 0.0])
 
 
-    def update(self, input: CarInput, dt: float):
+    def update(self, car_input: CarInput, dt: float):
 
         sin = np.sin(self.angle)
         cos = np.cos(self.angle)
@@ -81,7 +81,7 @@ class Car:
             side_slip = np.arctan(self.velocity[1] / self.velocity[0])
 
         # calculate slip angles for front and rear wheels (alpha)
-        slip_angle_front = side_slip + rot_angle - input.steer_angle
+        slip_angle_front = side_slip + rot_angle - car_input.steer_angle
         slip_angle_rear = side_slip - rot_angle
 
         # weight per axle
@@ -108,7 +108,7 @@ class Car:
             self.lateral_force_rear[1] *= 0.5
 
         # longitudinal force on rear wheels - very simple traction model
-        self.front_traction[0] = 100*(input.throttle - input.brake*np.sign(self.velocity[0]))
+        self.front_traction[0] = 100*(car_input.throttle - car_input.brake * np.sign(self.velocity[0]))
         self.front_traction[1] = 0
         if (self.rear_slip==1):
             self.front_traction[0] *= 0.5
@@ -120,8 +120,8 @@ class Car:
 
         # sum forces
         # TODO: check if better np one liner
-        self.force[0] = self.front_traction[0] + np.sin(input.steer_angle) * self.lateral_force_front[0] + self.lateral_force_rear[0] + self.resistance[0]
-        self.force[1] = self.front_traction[1] + np.cos(input.steer_angle) * self.lateral_force_front[1] + self.lateral_force_rear[1] + self.resistance[1]
+        self.force[0] = self.front_traction[0] + np.sin(car_input.steer_angle) * self.lateral_force_front[0] + self.lateral_force_rear[0] + self.resistance[0]
+        self.force[1] = self.front_traction[1] + np.cos(car_input.steer_angle) * self.lateral_force_front[1] + self.lateral_force_rear[1] + self.resistance[1]
         # print("force:", force)
 
         # torque on body from lateral forces

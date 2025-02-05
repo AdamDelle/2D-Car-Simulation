@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pygame
 
 RED = [255, 0, 0, 255]
@@ -18,3 +20,12 @@ def draw_rect(screen, image, center, angle):
     rotated = pygame.transform.rotate(image, angle)
     rect = rotated.get_rect(center = center)
     screen.blit(rotated, rect)
+
+def get_image_and_rect(image_path: str, scale: float = 1, angle: float = 0, x: int = 0, y: int = 0) -> Tuple[pygame.Surface, pygame.Rect]:
+    image = pygame.image.load(image_path)
+    image = pygame.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
+    image = pygame.transform.rotate(image, angle)
+    rect = image.get_rect()
+    rect.centerx = x
+    rect.centery = y
+    return image, rect
