@@ -3,6 +3,7 @@ import pygame
 
 from UI.input_handling import ControlsInput
 from UI.screen import Screen
+from UI.ui_widgets.speedometer import Speedometer
 from car import Car, CarInput
 from helpers import get_image_and_rect, draw_vector, RED
 
@@ -54,7 +55,7 @@ class GameDrawer:
             scale=1, angle=0,
             x=Screen.CENTER_X, y=Screen.CENTER_Y)
 
-
+        self.speedometer = Speedometer(100, 980, 80, 200)  # x, y, radius, max_speed
         self._last_update_time = 0
 
     def update(self, controls_input: ControlsInput):
@@ -63,12 +64,15 @@ class GameDrawer:
         self._last_update_time = current_time
         car_input = self._controls_input_to_car_input(controls_input)
         self._car.update(car_input, dt)
+        self.speedometer.update(self._car.velocity[0])
+
 
     def draw(self):
 
         self._draw_map()
         self._draw_car()
         self._draw_car_stats_as_text_on_screen()
+        self.speedometer.draw(self._screen)
 
 
     def _draw_map(self):
