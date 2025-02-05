@@ -1,8 +1,10 @@
 import pygame
 
-from UI.input_handling.car_input import InputHandler
+from UI.game_drawer import GameDrawer
+from UI.input_handling import InputHandler
 from UI.screen import Screen
 from button import Button
+from car import Car
 
 
 class GameScreen(Screen):
@@ -16,7 +18,9 @@ class GameScreen(Screen):
 
     def __init__(self, game):
         self.game = game
+        self._car = Car()
         self.input_handler = InputHandler()
+        self.game_drawer = GameDrawer(self.game.screen, self._car, self.input_handler)
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
         self.font = pygame.font.Font(None, 36)
 
@@ -51,14 +55,14 @@ class GameScreen(Screen):
 
     def draw(self):
         """Draw game screen."""
+        controls_input = self.input_handler.get_input()
+        self.game_drawer.update(controls_input)
+        self.game_drawer.draw()
+
+
+        self._draw_throttle_brake_bar(controls_input.y)
+        self._draw_steering_wheel(controls_input.x)
         self.back_button.draw(self.game.screen)
-        sim_input = self.input_handler.get_input()
-
-        # Draw throttle/brake bar
-        self._draw_throttle_brake_bar(sim_input.y)
-
-        # Draw steering wheel
-        self._draw_steering_wheel(sim_input.x)
 
     def _draw_throttle_brake_bar(self, y_input):
         """Draw the vertical throttle (green) and brake (red) bar."""

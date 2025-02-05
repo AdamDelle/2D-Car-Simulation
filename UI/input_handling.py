@@ -1,18 +1,17 @@
 import pygame
 
 
-class SimInput:
+class ControlsInput:
     def __init__(self):
         self.x = 0  # -1 for left, 1 for right
         self.y = 0  # -1 for up, 1 for down
-
 
 class InputHandler:
     TIME_UNTIL_MAX_INPUT = 500  # ms
     TIME_TO_FADE_BACK = 250  # ms
 
     def __init__(self):
-        self._input = SimInput()
+        self._input = ControlsInput()
         self._start_time_x = None
         self._start_time_y = None
         self._release_time_x = None
@@ -28,9 +27,6 @@ class InputHandler:
     def get_input(self):
         self.update_input()
         return self._input
-
-    def get_w_down(self):
-        return self._w_down
 
     def handle_input(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
