@@ -1,5 +1,9 @@
 from dataclasses import dataclass
+import dataclasses
+from pprint import pprint
 from re import A
+from typing import Mapping
+import json
 import numpy as np
 
 g = 9.81 # m/s^2
@@ -17,6 +21,7 @@ class CarInput:
 
 @dataclass
 class CarConfig:
+    name: str = "game"
     b: float = 1.0 # m
     c: float = 1.0 # m
     wheel_base: float = b + c # m
@@ -27,6 +32,32 @@ class CarConfig:
     length: float = 3.0 # m, must be > wheelbase
     wheel_length: float = 0.7 # m
     wheel_width: float = 0.3 # m
+
+    def serialize(self, file_name):
+        configs: list[CarConfig] = car_read_configs(file_name)
+        data = []
+        for config in configs:
+            if self.name != config.name:
+                data.append(dataclasses.asdict(config))
+        data.append(dataclasses.asdict(self))
+        with open(file_name, 'w') as file:
+            json.dump(data, file)
+
+    def load(self, file_name, config_name):
+        configs: list[CarConfig] = car_read_configs(file_name)
+        for config in configs:
+            if config_name == config.name:
+                self = config
+            else:
+                 raise Exception("Config not found.")
+
+def car_read_configs(file_name) -> list[CarConfig]:
+    result = []
+    with open(file_name, '+r') as file:
+        configs = json.load(file)
+        for config in configs:
+            result.append(CarConfig(**config))
+    return result
 
 @dataclass
 class Car:
@@ -57,6 +88,8 @@ class Car:
         self.front_traction = np.array([0.0, 0.0])
         self.lateral_force_front = np.array([0.0, 0.0])
         self.lateral_force_rear = np.array([0.0, 0.0])
+
+        self.config.serialize("cars")
 
 
     def update(self, car_input: CarInput, dt: float):
