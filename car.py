@@ -90,7 +90,6 @@ class Car:
         self.lateral_force_rear = np.array([0.0, 0.0])
 
         self.config.serialize("cars")
-        exit()
 
 
     def update(self, input: CarInput, dt: float):
