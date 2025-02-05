@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 import pygame
 
@@ -70,6 +68,7 @@ class GameDrawer:
 
         self._draw_map()
         self._draw_car()
+        self._draw_car_stats_as_text_on_screen()
 
 
     def _draw_map(self):
@@ -85,13 +84,25 @@ class GameDrawer:
         right_rotated_wheel_rect = rotated_wheel.get_rect(center=self._front_right_wheel_rect.center)
         self._screen.blit(rotated_wheel, left_rotated_wheel_rect)
         self._screen.blit(rotated_wheel, right_rotated_wheel_rect)
-
         self._screen.blit(self._rear_left_wheel_image, self._rear_left_wheel_rect)
         self._screen.blit(self._rear_right_wheel_image, self._rear_right_wheel_rect)
-        self._screen.blit(self._car_image, self._car_rect)
 
-        car_direction = np.array([np.cos(self._car.angle), np.sin(self._car.angle)])
-        draw_vector(self._screen, car_direction*100, (GameDrawer.CAR_X, GameDrawer.CAR_Y), color=RED, width=2)
+        car_angle = np.rad2deg(self._car.angle)
+        car_angle_rotated = -car_angle - 90
+        rotated_direction = np.array([np.cos(np.deg2rad(car_angle_rotated)), np.sin(np.deg2rad(car_angle_rotated))])
+
+        rotated_car = pygame.transform.rotate(self._car_image, car_angle)
+        rotated_car_rect = rotated_car.get_rect(center=self._car_rect.center)
+        self._screen.blit(rotated_car, rotated_car_rect)
+        draw_vector(self._screen, rotated_direction*100, (GameDrawer.CAR_X, GameDrawer.CAR_Y), color=RED, width=2)
+
+    def _draw_car_stats_as_text_on_screen(self):
+        velocity = self._car.velocity[0]
+        acceleration = self._car.acceleration[0]
+        text = f"Velocity: {round(velocity,2)}\tAcceleration: {round(acceleration, 2)}"
+        font = pygame.font.Font(None, 36)
+        text_surface = font.render(text, True, RED)
+        self._screen.blit(text_surface, (10, 10))
 
 
     def _calculate_map_transform(self):
@@ -100,12 +111,12 @@ class GameDrawer:
         car_angle = np.rad2deg(self._car.angle)
         map_x = GameDrawer.MAP_START_X + car_x*10
         map_y = GameDrawer.MAP_START_Y + car_y*10
-        map_angle = GameDrawer.MAP_START_ROTATION - car_angle
+        map_angle = 0 # GameDrawer.MAP_START_ROTATION - car_angle
         return map_x, map_y, map_angle
 
     @staticmethod
     def _controls_input_to_car_input(controls_input: ControlsInput) -> CarInput:
         steering_angle = -controls_input.x * np.pi / 4
-        throttle = controls_input.y * 100
-        brake = controls_input.y * -100
+        throttle = controls_input.y * 100 if controls_input.y > 0 else 0
+        brake = -controls_input.y * 100 if controls_input.y < 0 else 0
         return CarInput(steering_angle, throttle, brake)

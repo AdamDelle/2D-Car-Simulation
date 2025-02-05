@@ -92,8 +92,8 @@ class Car:
         self.lateral_force_front[0] = 0
         self.lateral_force_front[1] = CA_F * slip_angle_front
         self.lateral_force_front[1] = np.clip(self.lateral_force_front[1], -MAX_GRIP, MAX_GRIP)
-        print("MAX", MAX_GRIP)
-        print("lateral_force_front[1]", self.lateral_force_front[1])
+        #print("MAX", MAX_GRIP)
+        #print("lateral_force_front[1]", self.lateral_force_front[1])
         self.lateral_force_front[1] *= weight
         if self.front_slip == 1:
             self.lateral_force_front[1] *= 0.5
@@ -147,4 +147,4 @@ class Car:
         self.angular_velocity += angular_acceleration * dt
         self.angle += self.angular_velocity * dt
         self.orientation_vector = np.array([np.cos(self.angle), np.sin(self.angle)])
-        print(self.angle/(2*np.pi)*360 % 360)
+        #print(self.angle/(2*np.pi)*360 % 360)

@@ -23,9 +23,16 @@ def draw_rect(screen, image, center, angle):
 
 def get_image_and_rect(image_path: str, scale: float = 1, angle: float = 0, x: int = 0, y: int = 0) -> Tuple[pygame.Surface, pygame.Rect]:
     image = pygame.image.load(image_path)
-    image = pygame.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
+    image = scale_image(image, scale)
     image = pygame.transform.rotate(image, angle)
     rect = image.get_rect()
-    rect.centerx = x
-    rect.centery = y
+    set_rect_center(rect, (x, y))
     return image, rect
+
+def scale_image(image: pygame.Surface, scale: float) -> pygame.Surface:
+    return pygame.transform.scale(image, (int(image.get_width() * scale), int(image.get_height() * scale)))
+
+def set_rect_center(rect: pygame.Rect, center: Tuple[int, int]):
+    rect.centerx = center[0]
+    rect.centery = center[1]
+    return rect
