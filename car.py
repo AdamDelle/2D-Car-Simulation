@@ -53,10 +53,13 @@ class CarConfig:
 
 def car_read_configs(file_name) -> list[CarConfig]:
     result = []
-    with open(file_name, '+r') as file:
-        configs = json.load(file)
-        for config in configs:
-            result.append(CarConfig(**config))
+    with open(file_name, 'w+') as file:
+        try:
+            configs = json.load(file)
+            for config in configs:
+                result.append(CarConfig(**config))
+        except:
+            pass
     return result
 
 @dataclass
