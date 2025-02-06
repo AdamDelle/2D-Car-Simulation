@@ -66,7 +66,7 @@ class GameDrawer:
         self._last_update_time = current_time
         car_input = self._controls_input_to_car_input(controls_input)
         self._car.update(car_input, dt)
-        self.speedometer.update(self._car.velocity[0])
+        self.speedometer.update(self._car.velocity[0]*3.6)
 
 
     def draw(self):
