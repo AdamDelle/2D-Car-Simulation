@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 import dataclasses
-from pprint import pprint
-from re import A
-from typing import Mapping
+from typing import List
 import json
 import numpy as np
 
@@ -34,7 +32,7 @@ class CarConfig:
     wheel_width: float = 0.3 # m
 
     def serialize(self, file_name):
-        configs: list[CarConfig] = car_read_configs(file_name)
+        configs: List[CarConfig] = car_read_configs(file_name)
         data = []
         for config in configs:
             if self.name != config.name:
@@ -44,14 +42,14 @@ class CarConfig:
             json.dump(data, file)
 
     def load(self, file_name, config_name):
-        configs: list[CarConfig] = car_read_configs(file_name)
+        configs: List[CarConfig] = car_read_configs(file_name)
         for config in configs:
             if config_name == config.name:
                 self = config
             else:
                  raise Exception("Config not found.")
 
-def car_read_configs(file_name) -> list[CarConfig]:
+def car_read_configs(file_name) -> List[CarConfig]:
     result = []
     with open(file_name, 'w+') as file:
         try:
