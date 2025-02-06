@@ -12,12 +12,14 @@ class GameDrawer:
 
     CAR_X = Screen.CENTER_X
     CAR_Y = Screen.CENTER_Y
-    LEFT_WHEEL_X = CAR_X - 35
-    RIGHT_WHEEL_X = CAR_X + 35
-    FRONT_LEFT_WHEEL_Y = CAR_Y - 30
-    FRONT_RIGHT_WHEEL_Y = CAR_Y - 30
-    REAR_LEFT_WHEEL_Y = CAR_Y + 30
-    REAR_RIGHT_WHEEL_Y = CAR_Y + 30
+    WHEEL_X_OFFSET = 35
+    WHEEL_Y_OFFSET = 30
+    LEFT_WHEEL_X = CAR_X - WHEEL_X_OFFSET
+    RIGHT_WHEEL_X = CAR_X + WHEEL_X_OFFSET
+    FRONT_LEFT_WHEEL_Y = CAR_Y - WHEEL_Y_OFFSET
+    FRONT_RIGHT_WHEEL_Y = CAR_Y - WHEEL_Y_OFFSET
+    REAR_LEFT_WHEEL_Y = CAR_Y + WHEEL_Y_OFFSET
+    REAR_RIGHT_WHEEL_Y = CAR_Y + WHEEL_Y_OFFSET
 
     MAP_START_X = Screen.CENTER_X
     MAP_START_Y = Screen.CENTER_Y
@@ -82,23 +84,36 @@ class GameDrawer:
         self._screen.blit(self._map_image, self._map_rect)
 
     def _draw_car(self):
-        wheel_rotation = -self._input_handler.get_input().x * 35
-        rotated_wheel = pygame.transform.rotate(self._front_left_wheel_image, wheel_rotation)
-        left_rotated_wheel_rect = rotated_wheel.get_rect(center=self._front_left_wheel_rect.center)
-        right_rotated_wheel_rect = rotated_wheel.get_rect(center=self._front_right_wheel_rect.center)
-        self._screen.blit(rotated_wheel, left_rotated_wheel_rect)
-        self._screen.blit(rotated_wheel, right_rotated_wheel_rect)
-        self._screen.blit(self._rear_left_wheel_image, self._rear_left_wheel_rect)
-        self._screen.blit(self._rear_right_wheel_image, self._rear_right_wheel_rect)
+        car_rotation = np.rad2deg(self._car.angle)
+        car_angle_rotated = -car_rotation - 90
+        car_direction = np.array([np.cos(np.deg2rad(car_angle_rotated)), np.sin(np.deg2rad(car_angle_rotated))])
+        car_direction_norm = car_direction / np.linalg.norm(car_direction)
+        car_direction_perpendicular_norm = np.array([-car_direction_norm[1], car_direction_norm[0]])
 
-        car_angle = np.rad2deg(self._car.angle)
-        car_angle_rotated = -car_angle - 90
-        rotated_direction = np.array([np.cos(np.deg2rad(car_angle_rotated)), np.sin(np.deg2rad(car_angle_rotated))])
+        front_left_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) - car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET + car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
+        front_right_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET + car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
+        rear_left_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) - car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET - car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
+        rear_right_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET - car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
 
-        rotated_car = pygame.transform.rotate(self._car_image, car_angle)
+        rotated_car = pygame.transform.rotate(self._car_image, car_rotation)
         rotated_car_rect = rotated_car.get_rect(center=self._car_rect.center)
+
+        input_rotation = -self._input_handler.get_input().x * 35
+        front_wheel_rotation = car_rotation + input_rotation
+        rotated_front_wheel = pygame.transform.rotate(self._front_left_wheel_image, front_wheel_rotation)
+        rotated_rear_wheel = pygame.transform.rotate(self._rear_left_wheel_image, car_rotation)
+        front_left_rotated_wheel_rect = rotated_front_wheel.get_rect(center=(front_left_wheel_position[0], front_left_wheel_position[1]))
+        front_right_rotated_wheel_rect = rotated_front_wheel.get_rect(center=(front_right_wheel_position[0], front_right_wheel_position[1]))
+        rear_left_rotated_wheel_rect = rotated_rear_wheel.get_rect(center=(rear_left_wheel_position[0], rear_left_wheel_position[1]))
+        rear_right_rotated_wheel_rect = rotated_rear_wheel.get_rect(center=(rear_right_wheel_position[0], rear_right_wheel_position[1]))
+
+        self._screen.blit(rotated_front_wheel, front_left_rotated_wheel_rect)
+        self._screen.blit(rotated_front_wheel, front_right_rotated_wheel_rect)
+        self._screen.blit(rotated_rear_wheel, rear_left_rotated_wheel_rect)
+        self._screen.blit(rotated_rear_wheel, rear_right_rotated_wheel_rect)
         self._screen.blit(rotated_car, rotated_car_rect)
-        draw_vector(self._screen, rotated_direction*100, (GameDrawer.CAR_X, GameDrawer.CAR_Y), color=RED, width=2)
+        draw_vector(self._screen, car_direction_norm*100, (GameDrawer.CAR_X, GameDrawer.CAR_Y), color=RED, width=2)
+        draw_vector(self._screen, car_direction_perpendicular_norm*100, (GameDrawer.CAR_X, GameDrawer.CAR_Y), color=RED, width=2)
 
     def _draw_car_stats_as_text_on_screen(self):
         velocity = self._car.velocity[0]
