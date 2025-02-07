@@ -19,33 +19,38 @@ class GameDrawer:
     MAP_START_Y = Screen.CENTER_Y
     MAP_START_ROTATION = 0
 
-    PX_M_RATIO = 0.05
+    PX_M_RATIO_SCREEN = 30   #pixel/meter
+    PX_M_RATIO_CAR_IMAGE = 1277 / 3 # pixel/meter
+    PX_M_RATIO_MAP_IMAGE = 440 / 6 # pixel/meter
 
-    def __init__(self, screen, car, input_handler):
+    def __init__(self, screen, input_handler):
         self._screen = screen
-        self._car = car
         self._input_handler = input_handler
         self._car = Car()
 
+        map_image = pygame.image.load('assets/new_racetrack.png')
+        map_image_scaling_factor = 1/GameDrawer.PX_M_RATIO_MAP_IMAGE * GameDrawer.PX_M_RATIO_SCREEN
+
+        self._map_image= scale_and_rotate(map_image, scale=map_image_scaling_factor, angle=GameDrawer.MAP_START_ROTATION)
+
+
         car_image = pygame.image.load('assets/car_blue.png')
-        car_length_meters = self._car.config.length
-        car_length_pixels = self._meter_to_pixel(car_length_meters)
-        self._car_image_scaling_factor = car_length_pixels / car_image.get_width()
+        self._car_image_scaling_factor = 1/GameDrawer.PX_M_RATIO_CAR_IMAGE * GameDrawer.PX_M_RATIO_SCREEN
+        self._car_image= scale_and_rotate(car_image, scale=self._car_image_scaling_factor, angle=-90)
+
         self._wheel_x_offset = GameDrawer.WHEEL_X_OFFSET * self._car_image_scaling_factor
         self._wheel_y_offset = GameDrawer.WHEEL_Y_OFFSET * self._car_image_scaling_factor
 
-        self._car_image= scale_and_rotate(pygame.image.load('assets/car_blue.png'), scale=self._car_image_scaling_factor, angle=-90)
         self._front_left_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
         self._front_right_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
         self._rear_left_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
         self._rear_right_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
 
-        self._map_image= scale_and_rotate(pygame.image.load('assets/rennstrecke.png'), scale=1, angle=GameDrawer.MAP_START_ROTATION)
-
         self.speedometer = Speedometer(100, 980, 80, 200)
         self._last_update_time = 0
 
-    def update(self, controls_input: ControlsInput):
+    def update(self):
+        controls_input = self._input_handler.get_input()
         current_time = pygame.time.get_ticks()
         dt = (current_time - self._last_update_time) / 1000
         self._last_update_time = current_time
@@ -54,19 +59,10 @@ class GameDrawer:
         self.speedometer.update(self._car.velocity[0]*3.6)
 
     def draw(self):
-
         self._draw_map()
         self._draw_car()
         self._draw_car_stats_as_text_on_screen()
         self.speedometer.draw(self._screen)
-
-    @staticmethod
-    def _pixel_to_meter(pixel: int) -> float:
-        return pixel * GameDrawer.PX_M_RATIO
-
-    @staticmethod
-    def _meter_to_pixel(meter: float) -> int:
-        return int(meter / GameDrawer.PX_M_RATIO)
 
     def _draw_map(self):
         x, y, _ = self._calculate_map_transform()
@@ -118,8 +114,8 @@ class GameDrawer:
     def _calculate_map_transform(self):
         car_x = self._car.position_wc[0]
         car_y = self._car.position_wc[1]
-        map_x = GameDrawer.MAP_START_X + GameDrawer._meter_to_pixel(car_x)
-        map_y = GameDrawer.MAP_START_Y + GameDrawer._meter_to_pixel(car_y)
+        map_x = GameDrawer.MAP_START_X + car_x * GameDrawer.PX_M_RATIO_SCREEN
+        map_y = GameDrawer.MAP_START_Y + car_y * GameDrawer.PX_M_RATIO_SCREEN
         return map_x, map_y, 0
 
     @staticmethod

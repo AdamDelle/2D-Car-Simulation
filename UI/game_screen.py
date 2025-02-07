@@ -18,9 +18,8 @@ class GameScreen(Screen):
 
     def __init__(self, game):
         self.game = game
-        self._car = Car()
         self.input_handler = InputHandler()
-        self.game_drawer = GameDrawer(self.game.screen, self._car, self.input_handler)
+        self.game_drawer = GameDrawer(self.game.screen, self.input_handler)
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
         self.font = pygame.font.Font(None, 36)
 
@@ -55,11 +54,10 @@ class GameScreen(Screen):
 
     def draw(self):
         """Draw game screen."""
-        controls_input = self.input_handler.get_input()
-        self.game_drawer.update(controls_input)
+        self.game_drawer.update()
         self.game_drawer.draw()
 
-
+        controls_input = self.input_handler.get_input()
         self._draw_throttle_brake_bar(controls_input.y)
         self._draw_steering_wheel(controls_input.x)
         self.back_button.draw(self.game.screen)
