@@ -7,8 +7,10 @@ class ControlsInput:
         self.y = 0  # -1 for up, 1 for down
 
 class InputHandler:
-    TIME_UNTIL_MAX_INPUT = 500  # ms
-    TIME_TO_FADE_BACK = 250  # ms
+    TIME_UNTIL_MAX_INPUT_Y = 500  # ms
+    TIME_UNTIL_MAX_INPUT_X = 1000  # ms
+    TIME_TO_FADE_BACK_Y = 50  # ms
+    TIME_TO_FADE_BACK_X = 250  # ms
 
     def __init__(self):
         self._input = ControlsInput()
@@ -54,16 +56,16 @@ class InputHandler:
         # Handle Y-axis (acceleration/braking)
         if self._w_down:
             time_diff = current_time - self._start_time_y
-            self._input.y = min(time_diff / self.TIME_UNTIL_MAX_INPUT, 1)
+            self._input.y = min(time_diff / self.TIME_UNTIL_MAX_INPUT_Y, 1)
             self._last_value_y = self._input.y
         elif self._s_down:
             time_diff = current_time - self._start_time_y
-            self._input.y = -min(time_diff / self.TIME_UNTIL_MAX_INPUT, 1)
+            self._input.y = -min(time_diff / self.TIME_UNTIL_MAX_INPUT_Y, 1)
             self._last_value_y = self._input.y
         elif self._release_time_y is not None:
             time_since_release = current_time - self._release_time_y
-            if time_since_release < self.TIME_TO_FADE_BACK:
-                fade_factor = 1 - (time_since_release / self.TIME_TO_FADE_BACK)
+            if time_since_release < self.TIME_TO_FADE_BACK_Y:
+                fade_factor = 1 - (time_since_release / self.TIME_TO_FADE_BACK_Y)
                 self._input.y = self._last_value_y * fade_factor
             else:
                 self._input.y = 0
@@ -74,16 +76,16 @@ class InputHandler:
         # Handle X-axis (steering)
         if self._a_down:
             time_diff = current_time - self._start_time_x
-            self._input.x = -min(time_diff / self.TIME_UNTIL_MAX_INPUT, 1)
+            self._input.x = -min(time_diff / self.TIME_UNTIL_MAX_INPUT_X, 1)
             self._last_value_x = self._input.x
         elif self._d_down:
             time_diff = current_time - self._start_time_x
-            self._input.x = min(time_diff / self.TIME_UNTIL_MAX_INPUT, 1)
+            self._input.x = min(time_diff / self.TIME_UNTIL_MAX_INPUT_X, 1)
             self._last_value_x = self._input.x
         elif self._release_time_x is not None:
             time_since_release = current_time - self._release_time_x
-            if time_since_release < self.TIME_TO_FADE_BACK:
-                fade_factor = 1 - (time_since_release / self.TIME_TO_FADE_BACK)
+            if time_since_release < self.TIME_TO_FADE_BACK_X:
+                fade_factor = 1 - (time_since_release / self.TIME_TO_FADE_BACK_X)
                 self._input.x = self._last_value_x * fade_factor
             else:
                 self._input.x = 0
