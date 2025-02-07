@@ -5,25 +5,21 @@ from UI.input_handling import ControlsInput
 from UI.screen import Screen
 from UI.ui_widgets.speedometer import Speedometer
 from car import Car, CarInput
-from helpers import get_image_and_rect, draw_vector, RED
+from helpers import scale_and_rotate, draw_vector, RED
 
 
 class GameDrawer:
 
     CAR_X = Screen.CENTER_X
     CAR_Y = Screen.CENTER_Y
-    WHEEL_X_OFFSET = 35
-    WHEEL_Y_OFFSET = 30
-    LEFT_WHEEL_X = CAR_X - WHEEL_X_OFFSET
-    RIGHT_WHEEL_X = CAR_X + WHEEL_X_OFFSET
-    FRONT_LEFT_WHEEL_Y = CAR_Y - WHEEL_Y_OFFSET
-    FRONT_RIGHT_WHEEL_Y = CAR_Y - WHEEL_Y_OFFSET
-    REAR_LEFT_WHEEL_Y = CAR_Y + WHEEL_Y_OFFSET
-    REAR_RIGHT_WHEEL_Y = CAR_Y + WHEEL_Y_OFFSET
+    WHEEL_X_OFFSET = 350 # in original png
+    WHEEL_Y_OFFSET = 300 # in original png
 
     MAP_START_X = Screen.CENTER_X
     MAP_START_Y = Screen.CENTER_Y
     MAP_START_ROTATION = 0
+
+    PX_M_RATIO = 0.05
 
     def __init__(self, screen, car, input_handler):
         self._screen = screen
@@ -31,33 +27,22 @@ class GameDrawer:
         self._input_handler = input_handler
         self._car = Car()
 
-        self._car_image, self._car_rect = get_image_and_rect(
-            'assets/car_blue.png',
-            scale=0.1, angle=-90,
-            x=GameDrawer.CAR_X, y=GameDrawer.CAR_Y)
-        self._front_left_wheel_image, self._front_left_wheel_rect = get_image_and_rect(
-            'assets/wheel.png',
-            scale=0.1, angle=-90,
-            x=GameDrawer.LEFT_WHEEL_X, y=GameDrawer.FRONT_LEFT_WHEEL_Y)
-        self._front_right_wheel_image, self._front_right_wheel_rect = get_image_and_rect(
-            'assets/wheel.png',
-            scale=0.1, angle=-90,
-            x=GameDrawer.RIGHT_WHEEL_X, y=GameDrawer.FRONT_RIGHT_WHEEL_Y)
-        self._rear_left_wheel_image, self._rear_left_wheel_rect = get_image_and_rect(
-            'assets/wheel.png',
-            scale=0.1, angle=-90,
-            x=GameDrawer.LEFT_WHEEL_X, y=GameDrawer.REAR_LEFT_WHEEL_Y)
-        self._rear_right_wheel_image, self._rear_right_wheel_rect = get_image_and_rect(
-            'assets/wheel.png',
-            scale=0.1, angle=-90,
-            x=GameDrawer.RIGHT_WHEEL_X, y=GameDrawer.REAR_RIGHT_WHEEL_Y)
+        car_image = pygame.image.load('assets/car_blue.png')
+        car_length_meters = self._car.config.length
+        car_length_pixels = self._meter_to_pixel(car_length_meters)
+        self._car_image_scaling_factor = car_length_pixels / car_image.get_width()
+        self._wheel_x_offset = GameDrawer.WHEEL_X_OFFSET * self._car_image_scaling_factor
+        self._wheel_y_offset = GameDrawer.WHEEL_Y_OFFSET * self._car_image_scaling_factor
 
-        self._map_image, self._map_rect = get_image_and_rect(
-            'assets/rennstrecke.png',
-            scale=1, angle=0,
-            x=Screen.CENTER_X, y=Screen.CENTER_Y)
+        self._car_image= scale_and_rotate(pygame.image.load('assets/car_blue.png'), scale=self._car_image_scaling_factor, angle=-90)
+        self._front_left_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
+        self._front_right_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
+        self._rear_left_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
+        self._rear_right_wheel_image= scale_and_rotate(pygame.image.load('assets/wheel.png'), scale=self._car_image_scaling_factor, angle=-90)
 
-        self.speedometer = Speedometer(100, 980, 80, 200)  # x, y, radius, max_speed
+        self._map_image= scale_and_rotate(pygame.image.load('assets/rennstrecke.png'), scale=1, angle=GameDrawer.MAP_START_ROTATION)
+
+        self.speedometer = Speedometer(100, 980, 80, 200)
         self._last_update_time = 0
 
     def update(self, controls_input: ControlsInput):
@@ -68,7 +53,6 @@ class GameDrawer:
         self._car.update(car_input, dt)
         self.speedometer.update(self._car.velocity[0]*3.6)
 
-
     def draw(self):
 
         self._draw_map()
@@ -76,12 +60,20 @@ class GameDrawer:
         self._draw_car_stats_as_text_on_screen()
         self.speedometer.draw(self._screen)
 
+    @staticmethod
+    def _pixel_to_meter(pixel: int) -> float:
+        return pixel * GameDrawer.PX_M_RATIO
+
+    @staticmethod
+    def _meter_to_pixel(meter: float) -> int:
+        return int(meter / GameDrawer.PX_M_RATIO)
 
     def _draw_map(self):
-        x, y, angle = self._calculate_map_transform()
-        self._map_rect.center = (x, y)
-        #rotated_map = pygame.transform.rotate(self._map_image, angle)
-        self._screen.blit(self._map_image, self._map_rect)
+        x, y, _ = self._calculate_map_transform()
+        self._screen.blit(self._map_image, self._map_image.get_rect(center=(x, y)))
+
+    def _get_wheel_position(self, car_direction_norm, car_direction_perpendicular_norm, x_sign, y_sign):
+        return np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * x_sign * self._wheel_x_offset + car_direction_norm * y_sign * self._wheel_y_offset
 
     def _draw_car(self):
         car_rotation = np.rad2deg(self._car.angle)
@@ -90,13 +82,13 @@ class GameDrawer:
         car_direction_norm = car_direction / np.linalg.norm(car_direction)
         car_direction_perpendicular_norm = np.array([-car_direction_norm[1], car_direction_norm[0]])
 
-        front_left_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) - car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET + car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
-        front_right_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET + car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
-        rear_left_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) - car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET - car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
-        rear_right_wheel_position = np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * GameDrawer.WHEEL_X_OFFSET - car_direction_norm * GameDrawer.WHEEL_Y_OFFSET
+        front_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, 1)
+        front_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, 1)
+        rear_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, -1)
+        rear_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, -1)
 
         rotated_car = pygame.transform.rotate(self._car_image, car_rotation)
-        rotated_car_rect = rotated_car.get_rect(center=self._car_rect.center)
+        rotated_car_rect = rotated_car.get_rect(center=(GameDrawer.CAR_X, GameDrawer.CAR_Y))
 
         input_rotation = -self._input_handler.get_input().x * 35
         front_wheel_rotation = car_rotation + input_rotation
@@ -123,15 +115,12 @@ class GameDrawer:
         text_surface = font.render(text, True, RED)
         self._screen.blit(text_surface, (10, 10))
 
-
     def _calculate_map_transform(self):
         car_x = self._car.position_wc[0]
         car_y = self._car.position_wc[1]
-        car_angle = np.rad2deg(self._car.angle)
-        map_x = GameDrawer.MAP_START_X + car_x*10
-        map_y = GameDrawer.MAP_START_Y + car_y*10
-        map_angle = 0 # GameDrawer.MAP_START_ROTATION - car_angle
-        return map_x, map_y, map_angle
+        map_x = GameDrawer.MAP_START_X + GameDrawer._meter_to_pixel(car_x)
+        map_y = GameDrawer.MAP_START_Y + GameDrawer._meter_to_pixel(car_y)
+        return map_x, map_y, 0
 
     @staticmethod
     def _controls_input_to_car_input(controls_input: ControlsInput) -> CarInput:
