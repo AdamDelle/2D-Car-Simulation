@@ -21,7 +21,7 @@ class GameDrawer:
 
     PX_M_RATIO_SCREEN = 30   #pixel/meter
     PX_M_RATIO_CAR_IMAGE = 1277 / 3 # pixel/meter
-    PX_M_RATIO_MAP_IMAGE = 440 / 6 # pixel/meter
+    PX_M_RATIO_MAP_IMAGE = 240 / 6 # pixel/meter
 
     def __init__(self, screen, input_handler):
         self._screen = screen
@@ -29,14 +29,16 @@ class GameDrawer:
         self._car = Car()
 
         map_image = pygame.image.load('assets/new_racetrack.png')
+        racing_line = pygame.image.load('assets/racing_line.png')
+
         map_image_scaling_factor = 1/GameDrawer.PX_M_RATIO_MAP_IMAGE * GameDrawer.PX_M_RATIO_SCREEN
 
-        self._map_image= scale_and_rotate(map_image, scale=map_image_scaling_factor, angle=GameDrawer.MAP_START_ROTATION)
-
+        self._map_image = scale_and_rotate(map_image, scale=map_image_scaling_factor, angle=GameDrawer.MAP_START_ROTATION)
+        self._racing_line_image = scale_and_rotate(racing_line, scale=map_image_scaling_factor, angle=GameDrawer.MAP_START_ROTATION)
 
         car_image = pygame.image.load('assets/car_blue.png')
         self._car_image_scaling_factor = 1/GameDrawer.PX_M_RATIO_CAR_IMAGE * GameDrawer.PX_M_RATIO_SCREEN
-        self._car_image= scale_and_rotate(car_image, scale=self._car_image_scaling_factor, angle=-90)
+        self._car_image = scale_and_rotate(car_image, scale=self._car_image_scaling_factor, angle=-90)
 
         self._wheel_x_offset = GameDrawer.WHEEL_X_OFFSET * self._car_image_scaling_factor
         self._wheel_y_offset = GameDrawer.WHEEL_Y_OFFSET * self._car_image_scaling_factor
@@ -67,6 +69,7 @@ class GameDrawer:
     def _draw_map(self):
         x, y, _ = self._calculate_map_transform()
         self._screen.blit(self._map_image, self._map_image.get_rect(center=(x, y)))
+        self._screen.blit(self._racing_line_image, self._map_image.get_rect(center=(x, y)))
 
     def _get_wheel_position(self, car_direction_norm, car_direction_perpendicular_norm, x_sign, y_sign):
         return np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * x_sign * self._wheel_x_offset + car_direction_norm * y_sign * self._wheel_y_offset
