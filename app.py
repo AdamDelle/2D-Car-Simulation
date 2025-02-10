@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+import pygame_widgets
+
 from UI.screen import Screen
 from UI.game_screen import GameScreen
 from UI.menu_screen import MenuScreen
@@ -50,7 +52,8 @@ class Game:
         """Main game loop."""
         running = True
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
 
@@ -59,6 +62,8 @@ class Game:
             self.screen.fill((0, 0, 0))
 
             self.current_screen.draw()
+
+            pygame_widgets.update(events)
 
             pygame.display.flip()
             self.clock.tick(60)
