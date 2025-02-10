@@ -4,7 +4,7 @@ from UI.game_drawer import GameDrawer
 from UI.input_handling import InputHandler
 from UI.screen import Screen
 from button import Button
-from car import Car
+from UI.ui_widgets.checkbox import Checkbox
 
 
 class GameScreen(Screen):
@@ -21,6 +21,7 @@ class GameScreen(Screen):
         self.input_handler = InputHandler()
         self.game_drawer = GameDrawer(self.game.screen, self.input_handler)
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
+        self.checkbox = Checkbox(Screen.WIDTH - 200, 10, 30, "Rotate Map")
         self.font = pygame.font.Font(None, 36)
 
         # Load and prepare steering wheel image
@@ -51,6 +52,8 @@ class GameScreen(Screen):
             self.game.set_screen("menu")
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             self.input_handler.handle_input(event)
+        if self.checkbox.handle_event(event):
+            self.game_drawer.toggle_rotation_mode()
 
     def draw(self):
         """Draw game screen."""
@@ -61,6 +64,7 @@ class GameScreen(Screen):
         self._draw_throttle_brake_bar(controls_input.y)
         self._draw_steering_wheel(controls_input.x)
         self.back_button.draw(self.game.screen)
+        self.checkbox.draw(self.game.screen)
 
     def _draw_throttle_brake_bar(self, y_input):
         """Draw the vertical throttle (green) and brake (red) bar."""

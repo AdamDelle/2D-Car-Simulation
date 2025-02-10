@@ -50,6 +50,7 @@ class GameDrawer:
 
         self.speedometer = Speedometer(100, 980, 80, 200)
         self._last_update_time = 0
+        self.rotation_mode = False # True if map is rotated, False if car is rotated
 
     def update(self):
         controls_input = self._input_handler.get_input()
@@ -66,6 +67,9 @@ class GameDrawer:
         self._draw_car_stats_as_text_on_screen()
         self.speedometer.draw(self._screen)
 
+    def toggle_rotation_mode(self):
+        self.rotation_mode = not self.rotation_mode
+
     def _draw_map(self):
         x, y, _ = self._calculate_map_transform()
         self._screen.blit(self._map_image, self._map_image.get_rect(center=(x, y)))
@@ -75,7 +79,7 @@ class GameDrawer:
         return np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * x_sign * self._wheel_x_offset + car_direction_norm * y_sign * self._wheel_y_offset
 
     def _draw_car(self):
-        car_rotation = np.rad2deg(self._car.angle)
+        car_rotation = np.rad2deg(self._car.angle) if not self.rotation_mode else 0
         car_angle_rotated = -car_rotation - 90
         car_direction = np.array([np.cos(np.deg2rad(car_angle_rotated)), np.sin(np.deg2rad(car_angle_rotated))])
         car_direction_norm = car_direction / np.linalg.norm(car_direction)
@@ -114,12 +118,17 @@ class GameDrawer:
         text_surface = font.render(text, True, RED)
         self._screen.blit(text_surface, (10, 10))
 
+    def _get_wheel_position(self, car_direction_norm, car_direction_perpendicular_norm, x_sign, y_sign):
+        return np.array([GameDrawer.CAR_X, GameDrawer.CAR_Y]) + car_direction_perpendicular_norm * x_sign * self._wheel_x_offset + car_direction_norm * y_sign * self._wheel_y_offset
+
     def _calculate_map_transform(self):
         car_x = self._car.position_wc[0]
         car_y = self._car.position_wc[1]
+        car_angle = self._car.angle % (2 * np.pi)
         map_x = GameDrawer.MAP_START_X + car_x * GameDrawer.PX_M_RATIO_SCREEN
         map_y = GameDrawer.MAP_START_Y + car_y * GameDrawer.PX_M_RATIO_SCREEN
-        return map_x, map_y, 0
+        map_angle = -np.rad2deg(car_angle)
+        return map_x, map_y, map_angle
 
     @staticmethod
     def _controls_input_to_car_input(controls_input: ControlsInput) -> CarInput:
