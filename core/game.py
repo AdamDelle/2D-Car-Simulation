@@ -1,10 +1,12 @@
-import pygame
 import sys
 
-from UI.screen import Screen
-from UI.game_screen import GameScreen
-from UI.menu_screen import MenuScreen
-from UI.options_screen import OptionsScreen
+import pygame
+import pygame_widgets
+
+from ui.game_screen import GameScreen
+from ui.menu_screen import MenuScreen
+from ui.options_screen import OptionsScreen
+from ui.screen import Screen
 
 
 class Game:
@@ -50,7 +52,8 @@ class Game:
         """Main game loop."""
         running = True
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
 
@@ -60,12 +63,10 @@ class Game:
 
             self.current_screen.draw()
 
+            pygame_widgets.update(events)
+
             pygame.display.flip()
             self.clock.tick(60)
 
         pygame.quit()
         sys.exit()
-
-if __name__ == "__main__":
-    game = Game()
-    game.run()

@@ -2,7 +2,7 @@ import pygame
 
 
 class Button:
-    """A class to create reusable UI buttons for pygame.
+    """A class to create reusable ui buttons for pygame.
 
     Attributes:
         x (int): X-coordinate of button

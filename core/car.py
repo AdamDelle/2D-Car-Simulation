@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-import dataclasses
-from typing import List
-import json
+
 import numpy as np
 
 g = 9.81 # m/s^2
@@ -17,48 +15,37 @@ class CarInput:
     throttle: float
     brake: float
 
-@dataclass
 class CarConfig:
     name: str = "game"
     b: float = 1.0 # m
     c: float = 1.0 # m
     wheel_base: float = b + c # m
-    h: float = 1.0 # m
     m: float = 1500.0 # kg
     inertia: float = 1500.0 # kg*m
-    width: float = 1.5 # m
-    length: float = 3.0 # m, must be > wheelbase
-    wheel_length: float = 0.7 # m
-    wheel_width: float = 0.3 # m
 
-    def serialize(self, file_name):
-        configs: List[CarConfig] = car_read_configs(file_name)
-        data = []
-        for config in configs:
-            if self.name != config.name:
-                data.append(dataclasses.asdict(config))
-        data.append(dataclasses.asdict(self))
-        with open(file_name, 'w') as file:
-            json.dump(data, file)
+    def set_b(self, b):
+        self.b = b
+        self.wheel_base = self.b + self.c
 
-    def load(self, file_name, config_name):
-        configs: List[CarConfig] = car_read_configs(file_name)
-        for config in configs:
-            if config_name == config.name:
-                self = config
-            else:
-                 raise Exception("Config not found.")
+    def set_c(self, c):
+        self.c = c
+        self.wheel_base = self.b + self.c
 
-def car_read_configs(file_name) -> List[CarConfig]:
-    result = []
-    with open(file_name, 'w+') as file:
-        try:
-            configs = json.load(file)
-            for config in configs:
-                result.append(CarConfig(**config))
-        except:
-            pass
-    return result
+    def set_m(self, m):
+        self.m = m
+        self.inertia = m
+
+    def set_CA_R(self, ca_r):
+        global CA_R
+        CA_R = ca_r
+
+    def set_CA_F(self, ca_f):
+        global CA_F
+        CA_F = ca_f
+
+    def set_MAX_GRIP(self, max_grip):
+        global MAX_GRIP
+        MAX_GRIP = max_grip
 
 @dataclass
 class Car:
@@ -90,8 +77,7 @@ class Car:
         self.lateral_force_front = np.array([0.0, 0.0])
         self.lateral_force_rear = np.array([0.0, 0.0])
 
-        self.config.serialize("cars")
-
+        self.config = CarConfig()
 
     def update(self, car_input: CarInput, dt: float):
 

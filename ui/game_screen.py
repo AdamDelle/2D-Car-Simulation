@@ -1,10 +1,12 @@
 import pygame
 
-from UI.game_drawer import GameDrawer
-from UI.input_handling import InputHandler
-from UI.screen import Screen
-from button import Button
-from car import Car
+from core.car import Car
+from ui.game_drawer import GameDrawer
+from ui.input_handling import InputHandler
+from ui.screen import Screen
+from ui.widgets.button import Button
+from ui.widgets.checkbox import Checkbox
+from ui.widgets.settings import CarSettingsWidget
 
 
 class GameScreen(Screen):
@@ -18,8 +20,9 @@ class GameScreen(Screen):
 
     def __init__(self, game):
         self.game = game
+        self.car = Car()
         self.input_handler = InputHandler()
-        self.game_drawer = GameDrawer(self.game.screen, self.input_handler)
+        self.game_drawer = GameDrawer(self.game.screen, self.car,  self.input_handler)
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
         self.font = pygame.font.Font(None, 36)
 
@@ -44,6 +47,8 @@ class GameScreen(Screen):
             self.BAR_WIDTH,
             self.BAR_HEIGHT
         )
+        self._settings_checkbox = Checkbox(Screen.WIDTH - 150, 10, 30, "Settings")
+        self._settings = CarSettingsWidget(self.car.config, self.game.screen)
 
     def handle_event(self, event):
         """Handle events for game screen."""
@@ -51,6 +56,7 @@ class GameScreen(Screen):
             self.game.set_screen("menu")
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             self.input_handler.handle_input(event)
+        self._settings_checkbox.handle_event(event)
 
     def draw(self):
         """Draw game screen."""
@@ -61,6 +67,13 @@ class GameScreen(Screen):
         self._draw_throttle_brake_bar(controls_input.y)
         self._draw_steering_wheel(controls_input.x)
         self.back_button.draw(self.game.screen)
+
+        self._settings_checkbox.draw(self.game.screen)
+        if self._settings_checkbox.checked:
+            self._settings.show()
+        else:
+            self._settings.hide()
+        self._settings.update()
 
     def _draw_throttle_brake_bar(self, y_input):
         """Draw the vertical throttle (green) and brake (red) bar."""
