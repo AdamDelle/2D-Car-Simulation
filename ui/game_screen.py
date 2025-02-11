@@ -1,11 +1,12 @@
 import pygame
 
-from UI.game_drawer import GameDrawer
-from UI.input_handling import InputHandler
-from UI.screen import Screen
-from UI.ui_widgets.checkbox import Checkbox
-from UI.ui_widgets.settings import CarSettingsWidget
-from button import Button
+from core.car import Car
+from ui.game_drawer import GameDrawer
+from ui.input_handling import InputHandler
+from ui.screen import Screen
+from ui.widgets.button import Button
+from ui.widgets.checkbox import Checkbox
+from ui.widgets.settings import CarSettingsWidget
 
 
 class GameScreen(Screen):
@@ -19,8 +20,9 @@ class GameScreen(Screen):
 
     def __init__(self, game):
         self.game = game
+        self.car = Car()
         self.input_handler = InputHandler()
-        self.game_drawer = GameDrawer(self.game.screen, self.input_handler)
+        self.game_drawer = GameDrawer(self.game.screen, self.car,  self.input_handler)
         self.back_button = Button(50, 50, 200, 50, "Back to Menu")
         self.font = pygame.font.Font(None, 36)
 
@@ -46,7 +48,7 @@ class GameScreen(Screen):
             self.BAR_HEIGHT
         )
         self._settings_checkbox = Checkbox(Screen.WIDTH - 150, 10, 30, "Settings")
-        self._settings = CarSettingsWidget(None, self.game.screen)
+        self._settings = CarSettingsWidget(self.car.config, self.game.screen)
 
     def handle_event(self, event):
         """Handle events for game screen."""
@@ -67,7 +69,10 @@ class GameScreen(Screen):
         self.back_button.draw(self.game.screen)
 
         self._settings_checkbox.draw(self.game.screen)
-        self._settings.set_visibility(self._settings_checkbox.checked)
+        if self._settings_checkbox.checked:
+            self._settings.show()
+        else:
+            self._settings.hide()
         self._settings.update()
 
     def _draw_throttle_brake_bar(self, y_input):

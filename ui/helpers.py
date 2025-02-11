@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pygame
 
 RED = [255, 0, 0, 255]

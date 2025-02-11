@@ -1,7 +1,7 @@
 import pygame
 
-from UI.screen import Screen
-from button import Button
+from ui.screen import Screen
+from ui.widgets.button import Button
 
 
 class OptionsScreen(Screen):

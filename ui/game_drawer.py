@@ -1,15 +1,14 @@
 import numpy as np
 import pygame
 
-from UI.input_handling import ControlsInput
-from UI.screen import Screen
-from UI.ui_widgets.speedometer import Speedometer
-from car import Car, CarInput
-from helpers import scale_and_rotate, draw_vector, RED
+from core.car import CarInput
+from ui.helpers import scale_and_rotate, draw_vector, RED
+from ui.input_handling import ControlsInput
+from ui.screen import Screen
+from ui.widgets.speedometer import Speedometer
 
 
 class GameDrawer:
-
     CAR_X = Screen.CENTER_X
     CAR_Y = Screen.CENTER_Y
     WHEEL_X_OFFSET = 350 # in original png
@@ -23,10 +22,10 @@ class GameDrawer:
     PX_M_RATIO_CAR_IMAGE = 1277 / 3 # pixel/meter
     PX_M_RATIO_MAP_IMAGE = 240 / 6 # pixel/meter
 
-    def __init__(self, screen, input_handler):
+    def __init__(self, screen, car, input_handler):
         self._screen = screen
         self._input_handler = input_handler
-        self._car = Car()
+        self._car = car
 
         map_image = pygame.image.load('assets/new_racetrack.png')
         racing_line = pygame.image.load('assets/racing_line.png')

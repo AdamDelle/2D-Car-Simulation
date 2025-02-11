@@ -1,12 +1,12 @@
-import pygame
 import sys
 
+import pygame
 import pygame_widgets
 
-from UI.screen import Screen
-from UI.game_screen import GameScreen
-from UI.menu_screen import MenuScreen
-from UI.options_screen import OptionsScreen
+from ui.game_screen import GameScreen
+from ui.menu_screen import MenuScreen
+from ui.options_screen import OptionsScreen
+from ui.screen import Screen
 
 
 class Game:
@@ -70,7 +70,3 @@ class Game:
 
         pygame.quit()
         sys.exit()
-
-if __name__ == "__main__":
-    game = Game()
-    game.run()
