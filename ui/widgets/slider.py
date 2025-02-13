@@ -10,14 +10,13 @@ class TextSlider:
         self._max = max
         self._default = default
         self._text = text
+
         # the slider internally only works, if min=0, so we have to adjust the value
         self._slider = Slider(screen, Screen.WIDTH - x_offset, y_offset, width, height, min=0, max=max - min, initial=default - min, step=step, handleRadius=15)
-
+        self._output = TextBox(screen, Screen.WIDTH - x_offset, y_offset, 0, 0, fontSize=30)
         self._update_lambda = update_lambda
 
-        self._output = TextBox(screen, Screen.WIDTH - x_offset, y_offset, 0, 0, fontSize=30)
-        self._output.disable()
-        self.set_visibility(False)
+        self.hide()
 
     def show(self):
         self._slider.show()

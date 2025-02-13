@@ -5,12 +5,11 @@ import pygame
 from ui.screen import Screen
 from ui.widgets.button import Button
 
-
 class MenuScreen(Screen):
 
     BUTTON_WIDTH = 200
     BUTTON_HEIGHT = 50
-    BUTTON_SPACING = 80
+    BUTTON_SPACING = 40
 
     def __init__(self, game):
         self.game = game
@@ -27,7 +26,6 @@ class MenuScreen(Screen):
         self.menu_buttons = [
             Button(Screen.CENTER_X - MenuScreen.BUTTON_WIDTH // 2, Screen.CENTER_Y - MenuScreen.BUTTON_SPACING, MenuScreen.BUTTON_WIDTH, MenuScreen.BUTTON_HEIGHT,
                    "Start Game"),
-            Button(Screen.CENTER_X - MenuScreen.BUTTON_WIDTH // 2, Screen.CENTER_Y, MenuScreen.BUTTON_WIDTH, MenuScreen.BUTTON_HEIGHT, "Options"),
             Button(Screen.CENTER_X - MenuScreen.BUTTON_WIDTH // 2, Screen.CENTER_Y + MenuScreen.BUTTON_SPACING, MenuScreen.BUTTON_WIDTH, MenuScreen.BUTTON_HEIGHT,
                    "Exit")
         ]
@@ -38,12 +36,10 @@ class MenuScreen(Screen):
                 if i == 0:
                     self.game.set_screen("game")
                 elif i == 1:
-                    self.game.set_screen("options")
-                elif i == 2:
                     pygame.quit()
                     sys.exit()
 
-    def draw(self):
+    def draw(self, dt):
         """Draw menu screen."""
         # Draw background first
         self.game.screen.blit(self.background, (0, 0))
