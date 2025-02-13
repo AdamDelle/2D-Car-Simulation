@@ -13,5 +13,5 @@ class Screen(ABC):
         pass
 
     @abstractmethod
-    def draw(self):
+    def draw(self, dt):
         pass

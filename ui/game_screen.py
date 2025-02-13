@@ -48,6 +48,7 @@ class GameScreen(Screen):
             self.BAR_HEIGHT
         )
         self._settings_checkbox = Checkbox(Screen.WIDTH - 150, 10, 30, "Settings")
+        self._mode_checkbox = Checkbox(Screen.WIDTH - 290, 10, 30, "Debug")
         self._settings = CarSettingsWidget(self.car.config, self.game.screen)
 
     def handle_event(self, event):
@@ -57,23 +58,26 @@ class GameScreen(Screen):
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             self.input_handler.handle_input(event)
         self._settings_checkbox.handle_event(event)
+        self._mode_checkbox.handle_event(event)
 
-    def draw(self):
+    def draw(self, dt):
         """Draw game screen."""
-        self.game_drawer.update()
-        self.game_drawer.draw()
-
         controls_input = self.input_handler.get_input()
+        self._settings.update()
+        self.game_drawer.update(dt)
+
+        self.game_drawer.draw()
+        self._settings.draw()
+
         self._draw_throttle_brake_bar(controls_input.y)
         self._draw_steering_wheel(controls_input.x)
         self.back_button.draw(self.game.screen)
 
-        self._settings_checkbox.draw(self.game.screen)
-        if self._settings_checkbox.checked:
-            self._settings.show()
-        else:
-            self._settings.hide()
-        self._settings.update()
+        self.game_drawer._is_debug_mode = self._settings.mode_toggle.value
+        self.game_drawer._draw_acceleration = self._settings.acceleration_toggle.value
+        self.game_drawer._draw_velocity = self._settings.velocity_toggle.value
+        self.game_drawer._draw_friction_circle = self._settings.friction_circle_toggle.value
+        self.game_drawer._draw_resistance = self._settings.resistance_toggle.value
 
     def _draw_throttle_brake_bar(self, y_input):
         """Draw the vertical throttle (green) and brake (red) bar."""
