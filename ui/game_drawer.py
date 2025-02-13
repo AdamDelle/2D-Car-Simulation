@@ -90,10 +90,10 @@ class GameDrawer:
         car_direction_norm = car_direction / np.linalg.norm(car_direction)
         car_direction_perpendicular_norm = np.array([-car_direction_norm[1], car_direction_norm[0]])
 
-        front_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, 1)
-        front_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, 1)
-        rear_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, -1)
-        rear_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, -1)
+        front_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, -1)
+        front_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, -1)
+        rear_left_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, -1, 1)
+        rear_right_wheel_position = self._get_wheel_position(car_direction_norm, car_direction_perpendicular_norm, 1, 1)
 
         rotated_car = pygame.transform.rotate(self._car_image, car_rotation)
         rotated_car_rect = rotated_car.get_rect(center=(GameDrawer.CAR_X, GameDrawer.CAR_Y))
